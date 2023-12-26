@@ -1,0 +1,1 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;using System.ComponentModel.DataAnnotations;using System.ComponentModel;using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;namespace B2BPilot_API.Models.Dto{    public class CxtDTO    {        public int ProjectDetailsId { get; set; }        public List<string> SelectedTechnologyIds { get; set; }    }}
