@@ -38,20 +38,20 @@ namespace PortfolioManagement_API.Controllers.V1
         {
             try
             {
-                IEnumerable<Technology> paymentList = await _unitOfWork.Technology.GetAllAsync();
+                IEnumerable<Technology> technologyList = await _unitOfWork.Technology.GetAllAsync();
              
                 if (!string.IsNullOrEmpty(search))
                 {
                     string datasearch = search.ToLower();
-                    paymentList = paymentList.Where(u => u.TechnologyName.ToLower().Contains(datasearch));
+                    technologyList = technologyList.Where(u => u.TechnologyName.ToLower().Contains(datasearch));
                 }
                 //Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
                 if (pageNumber > 0)
                 {
-                    paymentList = paymentList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+                    technologyList = technologyList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
                 }
-                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paymentList));
-                _response.Result = _mapper.Map<List<TechnologyDTO>>(paymentList);
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(technologyList));
+                _response.Result = _mapper.Map<List<TechnologyDTO>>(technologyList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -76,13 +76,13 @@ namespace PortfolioManagement_API.Controllers.V1
         //    {
         //        term = string.IsNullOrEmpty(term) ? "" : term.ToLower();
 
-        //        TechnologyIndexVM paymentIndexVM = new TechnologyIndexVM();
+        //        TechnologyIndexVM technologyIndexVM = new TechnologyIndexVM();
         //        IEnumerable<Technology> list = await _unitOfWork.Technology.GetAllAsync();
         //        list.OrderBy(a => a.TechnologyName).ToList();
 
         //        var List = _mapper.Map<List<TechnologyDTO>>(list);
 
-        //        paymentIndexVM.NameSortOrder = string.IsNullOrEmpty(orderBy) ? "projectSizes_desc" : "";
+        //        technologyIndexVM.NameSortOrder = string.IsNullOrEmpty(orderBy) ? "projectSizes_desc" : "";
 
         //        if (!string.IsNullOrEmpty(term))
         //        {
@@ -105,14 +105,14 @@ namespace PortfolioManagement_API.Controllers.V1
         //        List = List.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
         //        // current=1, skip= (1-1=0), take=5 
         //        // currentPage=2, skip (2-1)*5 = 5, take=5 ,
-        //        paymentIndexVM.languages = List;
-        //        paymentIndexVM.CurrentPage = currentPage;
-        //        paymentIndexVM.TotalPages = totalPages;
-        //        paymentIndexVM.Term = term;
-        //        paymentIndexVM.PageSize = pageSize;
-        //        paymentIndexVM.OrderBy = orderBy;
+        //        technologyIndexVM.languages = List;
+        //        technologyIndexVM.CurrentPage = currentPage;
+        //        technologyIndexVM.TotalPages = totalPages;
+        //        technologyIndexVM.Term = term;
+        //        technologyIndexVM.PageSize = pageSize;
+        //        technologyIndexVM.OrderBy = orderBy;
 
-        //        _response.Result = _mapper.Map<TechnologyIndexVM>(paymentIndexVM);
+        //        _response.Result = _mapper.Map<TechnologyIndexVM>(technologyIndexVM);
         //        _response.StatusCode = HttpStatusCode.OK;
         //        return Ok(_response);
         //    }
@@ -141,13 +141,13 @@ namespace PortfolioManagement_API.Controllers.V1
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var payment = await _unitOfWork.Technology.GetAsync(u => u.Id == id);
-                if (payment == null)
+                var technology = await _unitOfWork.Technology.GetAsync(u => u.Id == id);
+                if (technology == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                _response.Result = _mapper.Map<TechnologyDTO>(payment);
+                _response.Result = _mapper.Map<TechnologyDTO>(technology);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -180,12 +180,12 @@ namespace PortfolioManagement_API.Controllers.V1
                     return BadRequest(createDTO);
                 }
               
-                Technology payment = _mapper.Map<Technology>(createDTO);
+                Technology technology = _mapper.Map<Technology>(createDTO);
             
-                await _unitOfWork.Technology.CreateAsync(payment);
-                _response.Result = _mapper.Map<TechnologyDTO>(payment);
+                await _unitOfWork.Technology.CreateAsync(technology);
+                _response.Result = _mapper.Map<TechnologyDTO>(technology);
                 _response.StatusCode = HttpStatusCode.Created;
-                return CreatedAtRoute("GetTechnology", new { id = payment.Id }, _response);
+                return CreatedAtRoute("GetTechnology", new { id = technology.Id }, _response);
             }
             catch (Exception ex)
             {
@@ -211,12 +211,12 @@ namespace PortfolioManagement_API.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var payment = await _unitOfWork.Technology.GetAsync(u => u.Id == id);
-                if (payment == null)
+                var technology = await _unitOfWork.Technology.GetAsync(u => u.Id == id);
+                if (technology == null)
                 {
                     return NotFound();
                 }
-                await _unitOfWork.Technology.RemoveAsync(payment);
+                await _unitOfWork.Technology.RemoveAsync(technology);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);
@@ -271,17 +271,17 @@ namespace PortfolioManagement_API.Controllers.V1
             {
                 return BadRequest();
             }
-            var payment = await _unitOfWork.Technology.GetAsync(u => u.Id == id, tracked: false);
+            var technology = await _unitOfWork.Technology.GetAsync(u => u.Id == id, tracked: false);
 
-            TechnologyUpdateDTO paymentDTO = _mapper.Map<TechnologyUpdateDTO>(payment);
+            TechnologyUpdateDTO technologyDTO = _mapper.Map<TechnologyUpdateDTO>(technology);
 
 
-            if (payment == null)
+            if (technology == null)
             {
                 return BadRequest();
             }
-            patchDTO.ApplyTo(paymentDTO, ModelState);
-            Technology model = _mapper.Map<Technology>(paymentDTO);
+            patchDTO.ApplyTo(technologyDTO, ModelState);
+            Technology model = _mapper.Map<Technology>(technologyDTO);
 
             await _unitOfWork.Technology.UpdateAsync(model);
 

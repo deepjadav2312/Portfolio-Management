@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using B2BPilot_API.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
@@ -48,29 +47,29 @@ namespace HelpingHands_API.Controllers.v1
         {
             try
             {
-                IEnumerable<ProjectXProjectType> companyXAmenityList;
+                IEnumerable<ProjectXProjectType> projectXProjectTypeList;
 
                 if (Id > 0)
                 {
 
-                    companyXAmenityList = await _unitOfWork.ProjectXProjectType.GetAllAsync(u => u.Id == Id, includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
+                    projectXProjectTypeList = await _unitOfWork.ProjectXProjectType.GetAllAsync(u => u.Id == Id, includeProperties: "ProjectDetails", pageSize: pageSize,
                         pageNumber: pageNumber);
                 }
                 else
                 {
-                    companyXAmenityList = await _unitOfWork.ProjectXProjectType.GetAllAsync(includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
+                    projectXProjectTypeList = await _unitOfWork.ProjectXProjectType.GetAllAsync(includeProperties: "ProjectDetails", pageSize: pageSize,
                         pageNumber: pageNumber);
                 }
                 if (!string.IsNullOrEmpty(search))
                 {
-                    companyXAmenityList = companyXAmenityList.Where(u => u.ProjectDetails.ProjectName.ToLower().Contains(search) ||
+                    projectXProjectTypeList = projectXProjectTypeList.Where(u => u.ProjectDetails.ProjectName.ToLower().Contains(search) ||
                                                  u.ProjectType.ProjectTypes.ToLower().Contains(search));
 
                 }
                 Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
 
                 Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
-                _response.Result = _mapper.Map<List<ProjectXProjectTypeDTO>>(companyXAmenityList);
+                _response.Result = _mapper.Map<List<ProjectXProjectTypeDTO>>(projectXProjectTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -103,13 +102,13 @@ namespace HelpingHands_API.Controllers.v1
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var category = await _unitOfWork.ProjectXProjectType.GetAsync(u => u.Id == id, includeProperties: "ProjectDetails,Technology");
-                if (category == null)
+                var projectXProject = await _unitOfWork.ProjectXProjectType.GetAsync(u => u.Id == id, includeProperties: "ProjectDetails");
+                if (projectXProject == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                _response.Result = _mapper.Map<ProjectXProjectTypeDTO>(category);
+                _response.Result = _mapper.Map<ProjectXProjectTypeDTO>(projectXProject);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -134,12 +133,12 @@ namespace HelpingHands_API.Controllers.v1
             {
                 await _unitOfWork.ProjectXProjectType.RemoveRangeAsync(u => u.ProjectDetailsId == createDTO.ProjectDetailsId, false);
 
-                foreach (var companyId in createDTO.SelectedProjectTypeIds)
+                foreach (var projectDetailsId in createDTO.SelectedProjectTypeIds)
                 {
-                    ProjectXProjectType companyXPayment = new();
-                    companyXPayment.ProjectDetailsId = createDTO.ProjectDetailsId;
-                    companyXPayment.ProjectTypeId = Convert.ToInt32(companyId);
-                    await _unitOfWork.ProjectXProjectType.CreateAsync(companyXPayment);
+                    ProjectXProjectType projectXProjectType = new();
+                    projectXProjectType.ProjectDetailsId = createDTO.ProjectDetailsId;
+                    projectXProjectType.ProjectTypeId = Convert.ToInt32(projectDetailsId);
+                    await _unitOfWork.ProjectXProjectType.CreateAsync(projectXProjectType);
                 }
                 _response.StatusCode = HttpStatusCode.Created;
                 return _response;
@@ -151,8 +150,7 @@ namespace HelpingHands_API.Controllers.v1
             }
             return _response;
         }
-
-        [HttpGet("{projectDetailsId:int}", Name = "GetProjectXProjectTypeByCompanyId")]
+        [HttpGet("{projectDetailsId:int}", Name = "GetProjectXProjectTypeByProjectDetailsId")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -210,12 +208,12 @@ namespace HelpingHands_API.Controllers.v1
                 {
                     return BadRequest();
                 }
-                var category = await _unitOfWork.ProjectXProjectType.GetAsync(u => u.Id == id);
-                if (category == null)
+                var projectXProject = await _unitOfWork.ProjectXProjectType.GetAsync(u => u.Id == id);
+                if (projectXProject == null)
                 {
                     return NotFound();
                 }
-                await _unitOfWork.ProjectXProjectType.RemoveAsync(category);
+                await _unitOfWork.ProjectXProjectType.RemoveAsync(projectXProject);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);

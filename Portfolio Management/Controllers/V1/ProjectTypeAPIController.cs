@@ -38,21 +38,21 @@ namespace PortfolioManagement_API.Controllers.V1
         {
             try
             {
-                IEnumerable<ProjectType> paymentList = await _unitOfWork.ProjectType.GetAllAsync();
+                IEnumerable<ProjectType> projectTypeList = await _unitOfWork.ProjectType.GetAllAsync();
 
 
                 if (!string.IsNullOrEmpty(search))
                 {
                     string datasearch = search.ToLower();
-                    paymentList = paymentList.Where(u => u.ProjectTypes.ToLower().Contains(datasearch));
+                    projectTypeList = projectTypeList.Where(u => u.ProjectTypes.ToLower().Contains(datasearch));
                 }
                // Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
                if(pageNumber > 0)
                 {
-                paymentList = paymentList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+                projectTypeList = projectTypeList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
                 }
-                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paymentList));
-                _response.Result = _mapper.Map<List<ProjectTypeDTO>>(paymentList);
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(projectTypeList));
+                _response.Result = _mapper.Map<List<ProjectTypeDTO>>(projectTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -77,13 +77,13 @@ namespace PortfolioManagement_API.Controllers.V1
         //    {
         //        term = string.IsNullOrEmpty(term) ? "" : term.ToLower();
 
-        //        ProjectTypeIndexVM paymentIndexVM = new ProjectTypeIndexVM();
+        //        ProjectTypeIndexVM projectTypeIndexVM = new ProjectTypeIndexVM();
         //        IEnumerable<ProjectType> list = await _unitOfWork.ProjectType.GetAllAsync();
         //        list.OrderBy(a => a.ProjectTypeName).ToList();
 
         //        var List = _mapper.Map<List<ProjectTypeDTO>>(list);
 
-        //        paymentIndexVM.NameSortOrder = string.IsNullOrEmpty(orderBy) ? "projectSizes_desc" : "";
+        //        projectTypeIndexVM.NameSortOrder = string.IsNullOrEmpty(orderBy) ? "projectSizes_desc" : "";
 
         //        if (!string.IsNullOrEmpty(term))
         //        {
@@ -106,14 +106,14 @@ namespace PortfolioManagement_API.Controllers.V1
         //        List = List.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
         //        // current=1, skip= (1-1=0), take=5 
         //        // currentPage=2, skip (2-1)*5 = 5, take=5 ,
-        //        paymentIndexVM.languages = List;
-        //        paymentIndexVM.CurrentPage = currentPage;
-        //        paymentIndexVM.TotalPages = totalPages;
-        //        paymentIndexVM.Term = term;
-        //        paymentIndexVM.PageSize = pageSize;
-        //        paymentIndexVM.OrderBy = orderBy;
+        //        projectTypeIndexVM.languages = List;
+        //        projectTypeIndexVM.CurrentPage = currentPage;
+        //        projectTypeIndexVM.TotalPages = totalPages;
+        //        projectTypeIndexVM.Term = term;
+        //        projectTypeIndexVM.PageSize = pageSize;
+        //        projectTypeIndexVM.OrderBy = orderBy;
 
-        //        _response.Result = _mapper.Map<ProjectTypeIndexVM>(paymentIndexVM);
+        //        _response.Result = _mapper.Map<ProjectTypeIndexVM>(projectTypeIndexVM);
         //        _response.StatusCode = HttpStatusCode.OK;
         //        return Ok(_response);
         //    }
@@ -143,13 +143,13 @@ namespace PortfolioManagement_API.Controllers.V1
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var payment = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id);
-                if (payment == null)
+                var projectType = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id);
+                if (projectType == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                _response.Result = _mapper.Map<ProjectTypeDTO>(payment);
+                _response.Result = _mapper.Map<ProjectTypeDTO>(projectType);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -182,12 +182,12 @@ namespace PortfolioManagement_API.Controllers.V1
                     return BadRequest(createDTO);
                 }
               
-                ProjectType payment = _mapper.Map<ProjectType>(createDTO);
+                ProjectType projectType = _mapper.Map<ProjectType>(createDTO);
             
-                await _unitOfWork.ProjectType.CreateAsync(payment);
-                _response.Result = _mapper.Map<ProjectTypeDTO>(payment);
+                await _unitOfWork.ProjectType.CreateAsync(projectType);
+                _response.Result = _mapper.Map<ProjectTypeDTO>(projectType);
                 _response.StatusCode = HttpStatusCode.Created;
-                return CreatedAtRoute("GetProjectType", new { id = payment.Id }, _response);
+                return CreatedAtRoute("GetProjectType", new { id = projectType.Id }, _response);
             }
             catch (Exception ex)
             {
@@ -213,12 +213,12 @@ namespace PortfolioManagement_API.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var payment = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id);
-                if (payment == null)
+                var projectType = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id);
+                if (projectType == null)
                 {
                     return NotFound();
                 }
-                await _unitOfWork.ProjectType.RemoveAsync(payment);
+                await _unitOfWork.ProjectType.RemoveAsync(projectType);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);
@@ -273,17 +273,17 @@ namespace PortfolioManagement_API.Controllers.V1
             {
                 return BadRequest();
             }
-            var payment = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id, tracked: false);
+            var projectType = await _unitOfWork.ProjectType.GetAsync(u => u.Id == id, tracked: false);
 
-            ProjectTypeUpdateDTO paymentDTO = _mapper.Map<ProjectTypeUpdateDTO>(payment);
+            ProjectTypeUpdateDTO projectTypeDTO = _mapper.Map<ProjectTypeUpdateDTO>(projectType);
 
 
-            if (payment == null)
+            if (projectType == null)
             {
                 return BadRequest();
             }
-            patchDTO.ApplyTo(paymentDTO, ModelState);
-            ProjectType model = _mapper.Map<ProjectType>(paymentDTO);
+            patchDTO.ApplyTo(projectTypeDTO, ModelState);
+            ProjectType model = _mapper.Map<ProjectType>(projectTypeDTO);
 
             await _unitOfWork.ProjectType.UpdateAsync(model);
 

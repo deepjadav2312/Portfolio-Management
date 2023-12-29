@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using B2BPilot_API.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
@@ -48,29 +47,29 @@ namespace HelpingHands_API.Controllers.v1
         {
             try
             {
-                IEnumerable<ProjectXTechnology> companyXAmenityList;
+                IEnumerable<ProjectXTechnology> projectXTechnologyList;
 
                 if (Id > 0)
                 {
 
-                    companyXAmenityList = await _unitOfWork.ProjectXTechnology.GetAllAsync(u => u.Id == Id, includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
+                    projectXTechnologyList = await _unitOfWork.ProjectXTechnology.GetAllAsync(u => u.Id == Id, includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
                         pageNumber: pageNumber);
                 }
                 else
                 {
-                    companyXAmenityList = await _unitOfWork.ProjectXTechnology.GetAllAsync(includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
+                    projectXTechnologyList = await _unitOfWork.ProjectXTechnology.GetAllAsync(includeProperties: "ProjectDetails,Technology", pageSize: pageSize,
                         pageNumber: pageNumber);
                 }
                 if (!string.IsNullOrEmpty(search))
                 {
-                    companyXAmenityList = companyXAmenityList.Where(u => u.ProjectDetails.ProjectName.ToLower().Contains(search) ||
+                    projectXTechnologyList = projectXTechnologyList.Where(u => u.ProjectDetails.ProjectName.ToLower().Contains(search) ||
                                                  u.Technology.TechnologyName.ToLower().Contains(search));
 
                 }
                 Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
 
                 Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
-                _response.Result = _mapper.Map<List<ProjectXTechnologyDTO>>(companyXAmenityList);
+                _response.Result = _mapper.Map<List<ProjectXTechnologyDTO>>(projectXTechnologyList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -103,13 +102,13 @@ namespace HelpingHands_API.Controllers.v1
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var category = await _unitOfWork.ProjectXTechnology.GetAsync(u => u.Id == id, includeProperties: "ProjectDetails,Technology");
-                if (category == null)
+                var projectXTech = await _unitOfWork.ProjectXTechnology.GetAsync(u => u.Id == id, includeProperties: "ProjectDetails,Technology");
+                if (projectXTech == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                _response.Result = _mapper.Map<ProjectXTechnologyDTO>(category);
+                _response.Result = _mapper.Map<ProjectXTechnologyDTO>(projectXTech);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -132,14 +131,15 @@ namespace HelpingHands_API.Controllers.v1
         {
             try
             {
+
                 await _unitOfWork.ProjectXTechnology.RemoveRangeAsync(u => u.ProjectDetailsId == createDTO.ProjectDetailsId, false);
 
-                foreach (var companyId in createDTO.SelectedTechnologyIds)
+                foreach (var technologyId in createDTO.SelectedTechnologyIds)
                 {
-                    ProjectXTechnology companyXPayment = new();
-                    companyXPayment.ProjectDetailsId = createDTO.ProjectDetailsId;
-                    companyXPayment.TechnologyId = Convert.ToInt32(companyId);
-                    await _unitOfWork.ProjectXTechnology.CreateAsync(companyXPayment);
+                    ProjectXTechnology projectXTechnology = new();
+                    projectXTechnology.ProjectDetailsId = createDTO.ProjectDetailsId;
+                    projectXTechnology.TechnologyId = Convert.ToInt32(technologyId);
+                    await _unitOfWork.ProjectXTechnology.CreateAsync(projectXTechnology);
                 }
                 _response.StatusCode = HttpStatusCode.Created;
                 return _response;
@@ -152,7 +152,7 @@ namespace HelpingHands_API.Controllers.v1
             return _response;
         }
 
-        [HttpGet("{projectDetailsId:int}", Name = "GetProjectXTechnologyByCompanyId")]
+        [HttpGet("{projectDetailsId:int}", Name = "GetProjectXTechnologyByProjectDetailsId")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -286,12 +286,12 @@ namespace HelpingHands_API.Controllers.v1
                 {
                     return BadRequest();
                 }
-                var category = await _unitOfWork.ProjectXTechnology.GetAsync(u => u.Id == id);
-                if (category == null)
+                var projectXTech = await _unitOfWork.ProjectXTechnology.GetAsync(u => u.Id == id);
+                if (projectXTech == null)
                 {
                     return NotFound();
                 }
-                await _unitOfWork.ProjectXTechnology.RemoveAsync(category);
+                await _unitOfWork.ProjectXTechnology.RemoveAsync(projectXTech);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);
